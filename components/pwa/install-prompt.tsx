@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { X, Download } from "lucide-react";
+import { X, Download, Info } from "lucide-react";
 import { APP_NAME } from "@/lib/constants";
 
 // Define the BeforeInstallPromptEvent interface properly
@@ -18,6 +18,8 @@ export function InstallPWA() {
   const [isInstalling, setIsInstalling] = useState(false);
   const [installError, setInstallError] = useState<string | null>(null);
   const [isStandalone, setIsStandalone] = useState(false);
+  const [showManualInstructionsUI, setShowManualInstructionsUI] =
+    useState(false);
 
   useEffect(() => {
     // Check if the app is already installed
@@ -68,10 +70,8 @@ export function InstallPWA() {
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) {
-      // If no deferred prompt is available, try manual installation instructions
-      setInstallError(
-        "Installation prompt not available. Please add this website to your home screen manually."
-      );
+      // If no deferred prompt is available, show manual installation UI
+      setShowManualInstructionsUI(true);
       return;
     }
 
@@ -104,15 +104,8 @@ export function InstallPWA() {
     }
   };
 
-  // For testing purposes, we'll show a manual install button if no prompt is available
-  const showManualInstructions = () => {
-    if (isStandalone) return false;
-
-    // Force show for testing
-    return true;
-  };
-
-  if (!showInstallPrompt && !showManualInstructions()) return null;
+  // Only show the component when there's a valid install prompt or when manually triggered
+  if (!showInstallPrompt && !showManualInstructionsUI) return null;
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-white p-4 shadow-lg border-t border-gray-200">
@@ -122,6 +115,18 @@ export function InstallPWA() {
           <p className="text-sm text-gray-600">
             Add to home screen for a better experience
           </p>
+          {showManualInstructionsUI && (
+            <div className="mt-2">
+              <p className="text-sm font-medium">Manual Installation:</p>
+              <ul className="text-xs text-gray-600 mt-1 list-disc pl-5">
+                <li>On iOS: Tap Share ⎙ and then "Add to Home Screen"</li>
+                <li>On Android: Open menu ⋮ and tap "Add to Home screen"</li>
+                <li>
+                  On Desktop: Look for the install icon in the address bar
+                </li>
+              </ul>
+            </div>
+          )}
           {installError && (
             <p className="text-sm text-red-500 mt-1">{installError}</p>
           )}
@@ -130,28 +135,42 @@ export function InstallPWA() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => setShowInstallPrompt(false)}
+            onClick={() => {
+              setShowInstallPrompt(false);
+              setShowManualInstructionsUI(false);
+            }}
           >
             <X className="h-4 w-4" />
             <span className="sr-only">Close</span>
           </Button>
-          <Button
-            onClick={handleInstallClick}
-            disabled={isInstalling}
-            className="flex items-center gap-2"
-          >
-            {isInstalling ? (
-              <>
-                <div className="h-4 w-4 border-2 border-t-transparent border-white rounded-full animate-spin"></div>
-                Installing...
-              </>
-            ) : (
-              <>
-                <Download className="h-4 w-4" />
-                Install App
-              </>
-            )}
-          </Button>
+          {showManualInstructionsUI ? (
+            <Button
+              variant="outline"
+              onClick={() => setShowManualInstructionsUI(false)}
+              className="flex items-center gap-2"
+            >
+              <Info className="h-4 w-4" />
+              Got it
+            </Button>
+          ) : (
+            <Button
+              onClick={handleInstallClick}
+              disabled={isInstalling}
+              className="flex items-center gap-2"
+            >
+              {isInstalling ? (
+                <>
+                  <div className="h-4 w-4 border-2 border-t-transparent border-white rounded-full animate-spin"></div>
+                  Installing...
+                </>
+              ) : (
+                <>
+                  <Download className="h-4 w-4" />
+                  Install App
+                </>
+              )}
+            </Button>
+          )}
         </div>
       </div>
     </div>
