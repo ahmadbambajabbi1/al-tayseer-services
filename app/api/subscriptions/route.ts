@@ -62,6 +62,7 @@ export async function POST(request: NextRequest) {
     await connectDB();
     const body = await request.json();
     const { serviceId } = body;
+    console.log({ serviceId });
     if (!serviceId) {
       return NextResponse.json(
         { error: "Service ID is required" },
@@ -71,6 +72,7 @@ export async function POST(request: NextRequest) {
     const service = await Services.findById(serviceId).populate(
       "servicesPeriod"
     );
+    console.log({ service });
 
     if (!service) {
       return NextResponse.json({ error: "Service not found" }, { status: 404 });
@@ -123,8 +125,9 @@ export async function POST(request: NextRequest) {
     });
     return NextResponse.json(newSubscription, { status: 201 });
   } catch (error) {
+    console.log({ error });
     return NextResponse.json(
-      { error: "Failed to create subscription" },
+      { error: "Failed to create subscription" err:error },
       { status: 500 }
     );
   }
