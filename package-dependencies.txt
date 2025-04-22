@@ -1,0 +1,4 @@
+framer-motion@10.16.4
+react-icons@4.11.0
+tailwindcss-animate@1.0.7
+@heroicons/react@2.0.18
