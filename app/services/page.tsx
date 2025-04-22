@@ -5,41 +5,7 @@ import { AnimatedFooter } from "@/components/layout/animated-footer";
 import connectDB from "@/lib/db";
 import Services from "@/models/service";
 import { APP_NAME } from "@/lib/constants";
-import "@/models/services-period"; // Make sure the path matches your file structure
-import "@/models/services-category"; // Make sure the path matches your file structure
-
-async function getServices() {
-  await connectDB();
-  try {
-    // First check if the model exists
-    if (!Services) {
-      console.error("Services model is not defined");
-      return [];
-    }
-
-    // Try to fetch services with error handling for populate
-    let servicesQuery = Services.find();
-
-    try {
-      servicesQuery = servicesQuery.populate("servicesPeriod");
-    } catch (error) {
-      console.error("Error populating servicesPeriod:", error);
-    }
-
-    try {
-      servicesQuery = servicesQuery.populate("servicesCategory");
-    } catch (error) {
-      console.error("Error populating servicesCategory:", error);
-    }
-
-    const services = await servicesQuery.sort({ createdAt: -1 });
-
-    return JSON.parse(JSON.stringify(services));
-  } catch (error) {
-    console.error("Error fetching services:", error);
-    return [];
-  }
-}
+import { getServices } from "@/services/services.services";
 
 export default async function ServicesPage() {
   const services = await getServices();

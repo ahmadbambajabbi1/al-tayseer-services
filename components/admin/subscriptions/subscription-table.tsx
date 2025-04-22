@@ -1,42 +1,54 @@
-"use client"
-import Link from "next/link"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Badge } from "@/components/ui/badge"
-import { MoreHorizontal, Eye } from "lucide-react"
+"use client";
+import Link from "next/link";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
+import { MoreHorizontal, Eye } from "lucide-react";
 
 interface SubscriptionTableProps {
   subscriptions: Array<{
-    _id: string
+    _id: string;
     user: {
-      fullName: string
-    }
+      fullName: string;
+    };
     service: {
-      name: string
-    }
-    quantity: number
-    totalPrice: number
-    paymentStatus: string
-    createdAt: string
-  }>
+      name: string;
+    };
+    quantity: number;
+    totalPrice: number;
+    paymentStatus: string;
+    createdAt: string;
+  }>;
 }
 
 export function SubscriptionTable({ subscriptions }: SubscriptionTableProps) {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "paid":
-        return "bg-green-100 text-green-800 hover:bg-green-100"
+        return "bg-green-100 text-green-800 hover:bg-green-100";
       case "pending":
-        return "bg-yellow-100 text-yellow-800 hover:bg-yellow-100"
+        return "bg-yellow-100 text-yellow-800 hover:bg-yellow-100";
       case "failed":
-        return "bg-red-100 text-red-800 hover:bg-red-100"
+        return "bg-red-100 text-red-800 hover:bg-red-100";
       case "refunded":
-        return "bg-gray-100 text-gray-800 hover:bg-gray-100"
+        return "bg-gray-100 text-gray-800 hover:bg-gray-100";
       default:
-        return ""
+        return "";
     }
-  }
+  };
 
   return (
     <div className="rounded-md border">
@@ -62,16 +74,24 @@ export function SubscriptionTable({ subscriptions }: SubscriptionTableProps) {
           ) : (
             subscriptions.map((subscription) => (
               <TableRow key={subscription._id}>
-                <TableCell className="font-medium">{subscription.user.fullName}</TableCell>
+                <TableCell className="font-medium">
+                  {subscription.user.fullName}
+                </TableCell>
                 <TableCell>{subscription.service.name}</TableCell>
                 <TableCell>{subscription.quantity} kg</TableCell>
-                <TableCell>${subscription.totalPrice}</TableCell>
+                <TableCell>D{subscription.totalPrice}</TableCell>
                 <TableCell>
-                  <Badge variant="outline" className={getStatusColor(subscription.paymentStatus)}>
-                    {subscription.paymentStatus.charAt(0).toUpperCase() + subscription.paymentStatus.slice(1)}
+                  <Badge
+                    variant="outline"
+                    className={getStatusColor(subscription.paymentStatus)}
+                  >
+                    {subscription.paymentStatus.charAt(0).toUpperCase() +
+                      subscription.paymentStatus.slice(1)}
                   </Badge>
                 </TableCell>
-                <TableCell>{new Date(subscription.createdAt).toLocaleDateString()}</TableCell>
+                <TableCell>
+                  {new Date(subscription.createdAt).toLocaleDateString()}
+                </TableCell>
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -96,5 +116,5 @@ export function SubscriptionTable({ subscriptions }: SubscriptionTableProps) {
         </TableBody>
       </Table>
     </div>
-  )
+  );
 }

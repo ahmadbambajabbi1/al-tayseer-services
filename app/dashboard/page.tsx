@@ -31,7 +31,6 @@ async function getSubscriptionStats(userId: string) {
       paid: paidSubscriptions,
     };
   } catch (error) {
-    console.error("Error getting subscription stats:", error);
     return {
       total: 0,
       pending: 0,

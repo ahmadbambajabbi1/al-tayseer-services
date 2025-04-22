@@ -1,37 +1,21 @@
-import { notFound } from "next/navigation"
-import { ServiceDetail } from "@/components/services/service-detail"
-import { EnhancedSiteHeader } from "@/components/layout/enhanced-site-header"
-import { AnimatedFooter } from "@/components/layout/animated-footer"
-import connectDB from "@/lib/db"
-import Services from "@/models/service"
+import { notFound } from "next/navigation";
+import { ServiceDetail } from "@/components/services/service-detail";
+import { EnhancedSiteHeader } from "@/components/layout/enhanced-site-header";
+import { AnimatedFooter } from "@/components/layout/animated-footer";
+import { getService } from "@/services/services.services";
 
 interface ServicePageProps {
   params: {
-    id: string
-  }
-}
-
-async function getService(id: string) {
-  await connectDB()
-  try {
-    const service = await Services.findById(id).populate("servicesPeriod").populate("servicesCategory")
-
-    if (!service) {
-      return null
-    }
-
-    return JSON.parse(JSON.stringify(service))
-  } catch (error) {
-    console.error("Error fetching service:", error)
-    return null
-  }
+    id: string;
+  };
 }
 
 export default async function ServicePage({ params }: ServicePageProps) {
-  const service = await getService(params.id)
+  const { id } = await params;
+  const service = await getService(id);
 
   if (!service) {
-    notFound()
+    notFound();
   }
 
   return (
@@ -44,5 +28,5 @@ export default async function ServicePage({ params }: ServicePageProps) {
       </main>
       <AnimatedFooter />
     </div>
-  )
+  );
 }

@@ -76,7 +76,7 @@ export function ServiceCard({ service }: ServiceCardProps) {
               variant="outline"
               className="bg-sky-50 text-sky-700 border-sky-200"
             >
-              ${service.total.toFixed(2)}
+              D{service.total.toFixed(2)}
             </Badge>
           </div>
         </CardHeader>

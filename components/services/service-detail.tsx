@@ -1,59 +1,63 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { useSession } from "next-auth/react"
-import Image from "next/image"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Badge } from "@/components/ui/badge"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import Image from "next/image";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 
 interface ServiceDetailProps {
   service: {
-    _id: string
+    _id: string;
     servicesPeriod: {
-      servicesPeriodByNumber: number
-      servicesPeriodByWord: string
-    }
+      servicesPeriodByNumber: number;
+      servicesPeriodByWord: string;
+    };
     servicesCategory: {
-      name: string
-    }
-    washFrequency: number
-    washingFolding: number
-    ironing: string
-    maximumKg: number
-    total: number
-    description?: string
-  }
+      name: string;
+    };
+    washFrequency: number;
+    washingFolding: number;
+    ironing: string;
+    maximumKg: number;
+    total: number;
+    description?: string;
+  };
 }
 
 export function ServiceDetail({ service }: ServiceDetailProps) {
-  const router = useRouter()
-  const { data: session } = useSession()
-  const [error, setError] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const router = useRouter();
+  const { data: session } = useSession();
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const formatPeriod = () => {
-    if (!service.servicesPeriod) return "N/A"
+    if (!service.servicesPeriod) return "N/A";
 
     try {
-      const { servicesPeriodByNumber, servicesPeriodByWord } = service.servicesPeriod
-      return `${servicesPeriodByNumber} ${servicesPeriodByWord}${servicesPeriodByNumber > 1 && !servicesPeriodByWord.endsWith("s") ? "s" : ""}`
+      const { servicesPeriodByNumber, servicesPeriodByWord } =
+        service.servicesPeriod;
+      return `${servicesPeriodByNumber} ${servicesPeriodByWord}${
+        servicesPeriodByNumber > 1 && !servicesPeriodByWord.endsWith("s")
+          ? "s"
+          : ""
+      }`;
     } catch (error) {
-      console.error("Error formatting period:", error)
-      return "N/A"
+      return "N/A";
     }
-  }
+  };
 
   const handleSubscribe = async () => {
     if (!session) {
-      router.push("/auth/signin")
-      return
+      router.push("/auth/signin");
+      return;
     }
 
-    setIsLoading(true)
-    setError(null)
+    setIsLoading(true);
+    setError(null);
 
     try {
       const response = await fetch("/api/subscriptions", {
@@ -63,25 +67,21 @@ export function ServiceDetail({ service }: ServiceDetailProps) {
         },
         body: JSON.stringify({
           serviceId: service._id,
-          quantity: service.maximumKg,
         }),
-      })
-
-      const data = await response.json()
-
+      });
+      const data = await response.json();
       if (!response.ok) {
-        setError(data.error || "Something went wrong. Please try again.")
-        return
+        setError(data.error || "Something went wrong. Please try again.");
+        return;
       }
-
-      router.push("/dashboard/subscriptions")
-      router.refresh()
+      router.push("/dashboard/subscriptions");
+      router.refresh();
     } catch (error) {
-      setError("Something went wrong. Please try again.")
+      setError("Something went wrong. Please try again.");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -101,8 +101,12 @@ export function ServiceDetail({ service }: ServiceDetailProps) {
         </div>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle>{service.servicesCategory?.name || "Laundry Service"}</CardTitle>
-            <Badge className="bg-sky-100 text-sky-700">${service.total.toFixed(2)}</Badge>
+            <CardTitle>
+              {service.servicesCategory?.name || "Laundry Service"}
+            </CardTitle>
+            <Badge className="bg-sky-100 text-sky-700">
+              D{service.total.toFixed(2)}
+            </Badge>
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -123,10 +127,10 @@ export function ServiceDetail({ service }: ServiceDetailProps) {
                 <span>{service.ironing}</span>
 
                 <span className="text-muted-foreground">Price per kg:</span>
-                <span>${service.washingFolding.toFixed(2)}</span>
+                <span>D{service.washingFolding.toFixed(2)}</span>
 
                 <span className="text-muted-foreground">Total Price:</span>
-                <span className="font-bold">${service.total.toFixed(2)}</span>
+                <span className="font-bold">D{service.total.toFixed(2)}</span>
               </div>
             </div>
 
@@ -148,5 +152,5 @@ export function ServiceDetail({ service }: ServiceDetailProps) {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

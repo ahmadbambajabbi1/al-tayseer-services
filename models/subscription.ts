@@ -1,26 +1,28 @@
-import mongoose from "mongoose"
+import mongoose from "mongoose";
 
 const SubscriptionSchema = new mongoose.Schema(
   {
     user: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
       required: true,
       ref: "User",
     },
     service: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Service",
+      ref: "Services",
       required: true,
     },
-    quantity: {
-      type: Number,
-      required: true,
-      min: [0, "Quantity cannot be negative"],
+    startDate: {
+      type: Date,
+      default: Date.now,
     },
-    totalPrice: {
+    endDate: {
+      type: Date,
+      required: true,
+    },
+    amount: {
       type: Number,
       required: true,
-      min: [0, "Price cannot be negative"],
     },
     paymentStatus: {
       type: String,
@@ -30,17 +32,34 @@ const SubscriptionSchema = new mongoose.Schema(
     paymentDate: {
       type: Date,
     },
+    washFrequencyTotal: {
+      type: Number,
+      required: true,
+    },
+    washFrequencyUsed: {
+      type: Number,
+      default: 0,
+    },
+    washFrequencyLeft: {
+      type: Number,
+      required: true,
+    },
     notes: {
       type: String,
     },
     adminProcessor: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "User",
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
     },
   },
   {
     timestamps: true,
-  },
-)
+  }
+);
 
-export default mongoose.models.Subscription || mongoose.model("Subscription", SubscriptionSchema)
+export default mongoose.models.Subscription ||
+  mongoose.model("Subscription", SubscriptionSchema);

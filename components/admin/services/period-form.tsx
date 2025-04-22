@@ -1,47 +1,62 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import type { z } from "zod"
-import { servicesPeriodSchema } from "@/lib/validations/service"
-import { Button } from "@/components/ui/button"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import type { z } from "zod";
+import { servicesPeriodSchema } from "@/lib/validations/service";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-type PeriodFormValues = z.infer<typeof servicesPeriodSchema>
+type PeriodFormValues = z.infer<typeof servicesPeriodSchema>;
 
 interface PeriodFormProps {
   period?: {
-    _id: string
-    servicesPeriodByNumber: number
-    servicesPeriodByWord: string
-  }
+    _id: string;
+    servicesPeriodByNumber: number;
+    servicesPeriodByWord: string;
+  };
 }
 
 export function PeriodForm({ period }: PeriodFormProps) {
-  const router = useRouter()
-  const [error, setError] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const form = useForm<PeriodFormValues>({
     resolver: zodResolver(servicesPeriodSchema),
     defaultValues: {
       servicesPeriodByNumber: period?.servicesPeriodByNumber || 1,
-      servicesPeriodByWord: period?.servicesPeriodByWord || "week",
+      servicesPeriodByWord: (period?.servicesPeriodByWord as any) || "week",
     },
-  })
+  });
 
   async function onSubmit(values: PeriodFormValues) {
-    setIsLoading(true)
-    setError(null)
+    setIsLoading(true);
+    setError(null);
 
     try {
-      const url = period?._id ? `/api/services-periods/${period._id}` : "/api/services-periods"
-      const method = period?._id ? "PUT" : "POST"
+      const url = period?._id
+        ? `/api/services-periods/${period._id}`
+        : "/api/services-periods";
+      const method = period?._id ? "PUT" : "POST";
 
       const response = await fetch(url, {
         method,
@@ -49,21 +64,21 @@ export function PeriodForm({ period }: PeriodFormProps) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(values),
-      })
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (!response.ok) {
-        setError(data.error || "Something went wrong. Please try again.")
-        return
+        setError(data.error || "Something went wrong. Please try again.");
+        return;
       }
 
-      router.push("/admin/services/periods")
-      router.refresh()
+      router.push("/admin/services/periods");
+      router.refresh();
     } catch (error) {
-      setError("Something went wrong. Please try again.")
+      setError("Something went wrong. Please try again.");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 
@@ -100,7 +115,10 @@ export function PeriodForm({ period }: PeriodFormProps) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Period Unit</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a period unit" />
@@ -124,10 +142,14 @@ export function PeriodForm({ period }: PeriodFormProps) {
           />
 
           <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? "Saving..." : period ? "Update Period" : "Create Period"}
+            {isLoading
+              ? "Saving..."
+              : period
+              ? "Update Period"
+              : "Create Period"}
           </Button>
         </form>
       </Form>
     </div>
-  )
+  );
 }

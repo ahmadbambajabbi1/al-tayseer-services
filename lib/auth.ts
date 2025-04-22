@@ -1,9 +1,9 @@
-import type { NextAuthOptions } from "next-auth"
-import GoogleProvider from "next-auth/providers/google"
-import CredentialsProvider from "next-auth/providers/credentials"
-import connectDB from "./db"
-import User from "@/models/user"
-import bcrypt from "bcryptjs"
+import type { NextAuthOptions } from "next-auth";
+import GoogleProvider from "next-auth/providers/google";
+import CredentialsProvider from "next-auth/providers/credentials";
+import connectDB from "./db";
+import User from "@/models/user";
+import bcrypt from "bcryptjs";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -19,21 +19,26 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.phoneNumber || !credentials?.password) {
-          throw new Error("Invalid credentials")
+          throw new Error("Invalid credentials");
         }
 
-        await connectDB()
+        await connectDB();
 
-        const user = await User.findOne({ phoneNumber: credentials.phoneNumber }).select("+password")
+        const user = await User.findOne({
+          phoneNumber: credentials.phoneNumber,
+        }).select("+password");
 
         if (!user) {
-          throw new Error("User not found")
+          throw new Error("User not found");
         }
 
-        const isPasswordCorrect = await bcrypt.compare(credentials.password, user.password)
+        const isPasswordCorrect = await bcrypt.compare(
+          credentials.password,
+          user.password
+        );
 
         if (!isPasswordCorrect) {
-          throw new Error("Invalid credentials")
+          throw new Error("Invalid credentials");
         }
 
         return {
@@ -42,83 +47,81 @@ export const authOptions: NextAuthOptions = {
           email: user.email,
           role: user.role,
           onboardingCompleted: user.onboardingCompleted,
-        }
+        };
       },
     }),
   ],
   callbacks: {
     async jwt({ token, user, account }) {
       if (account && account.provider === "google") {
-        await connectDB()
+        await connectDB();
+        const googleId = account.providerAccountId;
 
-        // For Google auth, use the Google ID as the user ID
-        const googleId = account.providerAccountId
-
-        // Check if user exists with this Google ID
-        let dbUser = await User.findOne({ googleId })
+        let dbUser = await User.findOne({ googleId });
 
         if (!dbUser && token.email) {
-          // Check if user exists with this email
-          dbUser = await User.findOne({ email: token.email })
+          dbUser = await User.findOne({ email: token.email });
 
           if (dbUser) {
-            // Update existing user with Google ID
-            dbUser.googleId = googleId
-            await dbUser.save()
+            dbUser.googleId = googleId;
+            await dbUser.save();
           } else {
-            // Create new user with Google ID as the primary ID
             dbUser = await User.create({
               fullName: token.name,
               email: token.email,
               googleId,
               onboardingCompleted: false,
-            })
+            });
           }
         }
 
         if (dbUser) {
-          // For Google auth, use the Google ID as the user ID
-          token.id = googleId
-          token.role = dbUser.role
-          token.onboardingCompleted = dbUser.onboardingCompleted
+          token.id = dbUser._id.toString();
+          token.googleId = googleId;
+          token.role = dbUser.role;
+          token.onboardingCompleted = dbUser.onboardingCompleted;
+
+          return token;
         }
       }
 
       if (user) {
-        token.id = user.id
-        token.role = user.role
-        token.onboardingCompleted = user.onboardingCompleted
+        token.id = user.id;
+        token.role = user.role;
+        token.onboardingCompleted = user.onboardingCompleted;
       }
 
-      // After setting token.id, token.role in the jwt callback
-      if (token) {
-        // Always fetch the latest user data to ensure we have current onboarding status
+      if (token.id && /^[0-9a-fA-F]{24}$/.test(token.id)) {
         try {
-          await connectDB()
+          await connectDB();
 
-          // Determine which field to query based on ID format
-          const query =
-            /^\d+$/.test(token.id) && String(token.id).length > 20 ? { googleId: token.id } : { _id: token.id }
-
-          const latestUser = await User.findOne(query)
+          const latestUser = await User.findById(token.id);
 
           if (latestUser) {
-            token.onboardingCompleted = latestUser.onboardingCompleted
+            token.onboardingCompleted = latestUser.onboardingCompleted;
+            if (latestUser.googleId) {
+              token.googleId = latestUser.googleId;
+            }
           }
         } catch (error) {
-          console.error("Error fetching latest user data:", error)
+          console.error("Error fetching latest user data:");
         }
       }
 
-      return token
+      return token;
     },
     async session({ session, token }) {
       if (token) {
-        session.user.id = token.id as string
-        session.user.role = token.role as string
-        session.user.onboardingCompleted = token.onboardingCompleted as boolean
+        session.user.id = token.id as string;
+
+        if (token.googleId) {
+          session.user.googleId = token.googleId as string;
+        }
+
+        session.user.role = token.role as string;
+        session.user.onboardingCompleted = token.onboardingCompleted as boolean;
       }
-      return session
+      return session;
     },
   },
   pages: {
@@ -129,4 +132,4 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
   },
   secret: process.env.NEXTAUTH_SECRET,
-}
+};
