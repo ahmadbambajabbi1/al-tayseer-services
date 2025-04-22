@@ -5,6 +5,8 @@ import Services from "@/models/service";
 import ServicesPeriod from "@/models/services-period";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import "@/models/services-period";
+import "@/models/services-category";
 
 export async function GET() {
   try {
