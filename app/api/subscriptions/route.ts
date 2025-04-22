@@ -127,7 +127,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.log({ error });
     return NextResponse.json(
-      { error: "Failed to create subscription" err:error },
+      { error: "Failed to create subscription", err: error },
       { status: 500 }
     );
   }
