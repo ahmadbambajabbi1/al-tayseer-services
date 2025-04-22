@@ -18,12 +18,14 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  // Add PWA configuration here
+  pwa: {
+    dest: "public",
+    register: true,
+    skipWaiting: true,
+    disable: process.env.NODE_ENV === "development",
+  },
 };
 
-// Apply the PWA configuration using the withPWA wrapper
-export default withPWA({
-  dest: "public",
-  register: true,
-  skipWaiting: true,
-  disable: process.env.NODE_ENV === "development",
-})(nextConfig);
+// Apply the withPWA wrapper to the full config
+export default withPWA(nextConfig);
